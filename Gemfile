@@ -3,6 +3,7 @@ source "http://rubygems.org/"
 
 # declare the sinatra dependency
 gem 'sinatra'
+gem 'sinatra-logger'
 gem 'multi_json'
 gem 'facter'
 
