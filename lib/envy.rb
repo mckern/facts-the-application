@@ -3,7 +3,7 @@ require 'multi_json'
 require 'csv'
 
 class Envy < Sinatra::Base
-  set :root, ENV['APP_ROOT']
+  set :root, APP_ROOT
 
   set :logging, true
 
@@ -17,7 +17,9 @@ class Envy < Sinatra::Base
   helpers do
     def get_facts
       Facter.reset
-      Facter.to_hash
+      facts = Facter.to_hash
+      FILTERS.each { |filter| facts.delete(filter.strip) }
+      return facts
     end
   end
 
