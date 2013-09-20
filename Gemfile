@@ -3,12 +3,11 @@ source "http://rubygems.org/"
 
 # declare the sinatra dependency
 gem 'sinatra'
-gem 'sinatra-logger'
 gem 'multi_json'
 gem 'facter'
 
-group :development do
-  gem 'sinatra-contrib'
+group :puppet do
+  gem 'puppet'
 end
 
 group :test do

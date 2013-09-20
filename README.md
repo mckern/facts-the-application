@@ -1,4 +1,4 @@
-# Envy: display `facter` over HTTP
+# Facts: display `facter` over HTTP
 
     Endpoints:
       /index.txt, /index.tsv, /
