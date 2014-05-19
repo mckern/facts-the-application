@@ -15,9 +15,7 @@ class Facts < Sinatra::Base
   # is configured; this adds access to any facts distributed
   # with/by Puppet
   if ENV['USE_PUPPET']
-    Bundler.require :puppet
-
-    require_relative 'Facts/extensions'
+    require_relative 'facts/extensions'
     Facts::Extensions.load_puppet
   end
 
@@ -26,7 +24,9 @@ class Facts < Sinatra::Base
   helpers do
     def get_facts
       Facter.reset
-      facts = Facter.to_hash
+      # Take a hash (which is wildly ordered), sort it (which returns an array),
+      # and then turn it back into a hash. Wheeeeeee, Ruby.
+      facts = Facter.to_hash.sort.to_h
       facts.delete_if { |key| FILTERS.include? key }
     end
   end
@@ -45,7 +45,7 @@ class Facts < Sinatra::Base
   end
 
   get '/index.csv' do
-    content_type 'text/csv'
+    content_type 'text/csv;charset=utf-8'
 
     @facts = get_facts
     @facts.map { |fact| fact.to_csv }
