@@ -1,5 +1,5 @@
 # define our source to loook for gems
-source "http://rubygems.org/"
+source 'https://rubygems.org/'
 
 # declare the sinatra dependency
 gem 'sinatra'
