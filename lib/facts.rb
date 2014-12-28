@@ -22,7 +22,7 @@ class Facts < Sinatra::Base
   # Define a helper to ensure that facts are fresh
   # and purge filtered facts from display
   helpers do
-    def get_facts
+    def load_facts
       Facter.reset
       # Take a hash (which is wildly ordered), sort it (which returns an array),
       # and then turn it back into a hash. Wheeeeeee, Ruby.
@@ -39,7 +39,7 @@ class Facts < Sinatra::Base
     get path do
       content_type ' text/plain'
 
-      @facts = get_facts
+      @facts = load_facts
       @facts.map { |k, v| "#{k}\t#{v}\n" }
     end
   end
@@ -47,21 +47,21 @@ class Facts < Sinatra::Base
   get '/index.csv' do
     content_type 'text/csv;charset=utf-8'
 
-    @facts = get_facts
-    @facts.map { |fact| fact.to_csv }
+    @facts = load_facts
+    @facts.map(&:to_csv)
   end
 
   get '/index.json' do
     content_type 'application/json;charset=utf-8'
 
-    @facts = get_facts
-    MultiJson.dump(@facts, :pretty => true)
+    @facts = load_facts
+    MultiJson.dump(@facts, pretty: true)
   end
 
   get %r{\A/index\.(yaml|yml)\z} do
     content_type 'text/x-yaml;charset=utf-8'
 
-    @facts = get_facts
+    @facts = load_facts
     YAML.dump @facts
   end
 end
