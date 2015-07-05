@@ -1,4 +1,3 @@
-require 'facter'
 require 'multi_json'
 require 'csv'
 
@@ -11,11 +10,14 @@ class Facts < Sinatra::Base
     enable :dump_errors, :raise_errors
   end
 
+  # Load Facter
+  require 'facts/extensions/facter'
+
   # Add Puppet libdir to $load_path if this env. variable
   # is configured; this adds access to any facts distributed
   # with/by Puppet
   if ENV['USE_PUPPET']
-    require_relative 'facts/extensions'
+    require 'facts/extensions'
     Facts::Extensions.load_puppet
   end
 
