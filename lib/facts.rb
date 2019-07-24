@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'csv'
 require 'json'
 
@@ -37,9 +39,9 @@ class Facts < Sinatra::Base
     redirect '/'
   end
 
-  ['/', '/index.json'].each do
+  ['/', '/index.json'].each do |path|
     get path do
-      content_type 'application/json;charset=utf-8'
+      content_type "application/json;charset=#{settings.default_encoding}"
 
       @facts = load_facts
       JSON.pretty_generate(@facts)
@@ -47,21 +49,21 @@ class Facts < Sinatra::Base
   end
 
   get '/index.csv' do
-    content_type 'text/csv;charset=utf-8'
+    content_type "text/csv;charset=#{settings.default_encoding}"
 
     @facts = load_facts
     @facts.map(&:to_csv)
   end
 
-  get %r{\A/index\.(txt|tsv)\z} do
-    content_type ' text/plain'
+  get %r{/index\.(txt|tsv)} do
+    content_type "text/tab-separated-values;charset=#{settings.default_encoding}"
 
     @facts = load_facts
     @facts.map { |row| row.to_csv(col_sep: "\t") }
   end
 
-  get %r{\A/index\.(yaml|yml)\z} do
-    content_type 'text/x-yaml;charset=utf-8'
+  get %r{/index\.(yaml|yml)} do
+    content_type "text/x-yaml;charset=#{settings.default_encoding}"
 
     @facts = load_facts
     YAML.dump @facts
