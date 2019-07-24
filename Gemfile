@@ -2,8 +2,7 @@
 source 'https://rubygems.org/'
 
 # declare the sinatra dependency
-gem 'sinatra', '~> 1.4.0'
-gem 'multi_json', '~> 1.11.0'
+gem 'sinatra', '< 2.0.0'
 
 # Facter 3 is a C++ program, and it includes a Facter library.
 # The bindings for this are vendored into Facts-The-Application

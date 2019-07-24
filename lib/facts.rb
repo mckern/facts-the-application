@@ -1,5 +1,5 @@
-require 'multi_json'
 require 'csv'
+require 'json'
 
 class Facts < Sinatra::Base
   set :root, APP_ROOT
@@ -34,15 +34,15 @@ class Facts < Sinatra::Base
   end
 
   not_found do
-    redirect '/index.txt'
+    redirect '/'
   end
 
-  ['/', '/index.txt', '/index.tsv'].each do |path|
+  ['/', '/index.json'].each do
     get path do
-      content_type ' text/plain'
+      content_type 'application/json;charset=utf-8'
 
       @facts = load_facts
-      @facts.map { |k, v| "#{k}\t#{v}\n" }
+      JSON.pretty_generate(@facts)
     end
   end
 
@@ -53,11 +53,11 @@ class Facts < Sinatra::Base
     @facts.map(&:to_csv)
   end
 
-  get '/index.json' do
-    content_type 'application/json;charset=utf-8'
+  get %r{\A/index\.(txt|tsv)\z} do
+    content_type ' text/plain'
 
     @facts = load_facts
-    MultiJson.dump(@facts, pretty: true)
+    @facts.map { |row| row.to_csv(col_sep: "\t") }
   end
 
   get %r{\A/index\.(yaml|yml)\z} do
