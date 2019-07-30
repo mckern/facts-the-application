@@ -9,7 +9,7 @@ class Facts
         begin
           require "#{ENV['FACTERDIR'] || '/usr'}/lib/libfacter.so"
         rescue LoadError
-          raise LoadError.new('libfacter was not found. Please make sure it was installed to the expected location.')
+          raise LoadError, 'libfacter was not found. Please make sure it was installed to the expected location.'
         end
       end
     end

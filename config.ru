@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
 
-APP_ROOT = File.expand_path(File.dirname(__FILE__))
+APP_ROOT = __dir__
 $LOAD_PATH.unshift(File.join(APP_ROOT, 'lib')).uniq!
 
 # These are Facter keys/facts that should not be displayed
 # by Facts-The-Application.
-FILTERS = %w[
+
+DEFAULT_FILTERS = %w[
   ec2_public_keys_0_openssh_key
   ec2_userdata
   path
@@ -15,7 +16,9 @@ FILTERS = %w[
   sshfp_ecdsa
   sshfp_rsa
   sshrsakey
-]
+].freeze
+
+FILTERS = ENV['FILTER'] ? ENV['FILTER'].split(',').map(&:strip) : DEFAULT_FILTERS
 
 require 'rubygems'
 require 'sinatra'

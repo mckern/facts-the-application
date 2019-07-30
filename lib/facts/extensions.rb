@@ -13,7 +13,7 @@ class Facts
       $LOAD_PATH.push Puppet[:libdir] unless $LOAD_PATH.include? Puppet[:libdir]
       $LOAD_PATH.uniq!
     rescue LoadError => detail
-      $stderr.puts "Could not load Puppet: #{detail}"
+      warn "Could not load Puppet: #{detail}"
     end
   end
 end

@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 require 'csv' if ENV['SLOW_FACTER_PLEASE']
 require 'json'
 
