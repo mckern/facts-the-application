@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require 'csv'
+require 'csv' if ENV['SLOW_FACTER_PLEASE']
 require 'json'
 
 class Facts < Sinatra::Base
@@ -30,8 +30,7 @@ class Facts < Sinatra::Base
       Facter.reset
       # Take a hash (which is wildly ordered), sort it (which returns an array),
       # and then turn it back into a hash. Wheeeeeee, Ruby.
-      facts = Facter.to_hash.sort.to_h
-      facts.delete_if { |key| FILTERS.include? key }
+      Hash[Facter.to_hash.sort].delete_if { |key| FILTERS.include? key }
     end
   end
 
@@ -42,30 +41,26 @@ class Facts < Sinatra::Base
   ['/', '/index.json'].each do |path|
     get path do
       content_type "application/json;charset=#{settings.default_encoding}"
-
-      @facts = load_facts
-      JSON.pretty_generate(@facts)
+      JSON.pretty_generate load_facts
     end
-  end
-
-  get '/index.csv' do
-    content_type "text/csv;charset=#{settings.default_encoding}"
-
-    @facts = load_facts
-    @facts.map(&:to_csv)
-  end
-
-  get %r{/index\.(txt|tsv)} do
-    content_type "text/tab-separated-values;charset=#{settings.default_encoding}"
-
-    @facts = load_facts
-    @facts.map { |row| row.to_csv(col_sep: "\t") }
   end
 
   get %r{/index\.(yaml|yml)} do
     content_type "text/x-yaml;charset=#{settings.default_encoding}"
+    YAML.dump load_facts
+  end
 
-    @facts = load_facts
-    YAML.dump @facts
+  # native facter (facter 3+) uses structured facts, which do not
+  # easily flatten into two-dimensional data structures.
+  if ENV['SLOW_FACTER_PLEASE']
+    get '/index.csv' do
+      content_type "text/csv;charset=#{settings.default_encoding}"
+      load_facts.map(&:to_csv)
+    end
+
+    get %r{/index\.(txt|tsv)} do
+      content_type "text/tab-separated-values;charset=#{settings.default_encoding}"
+      load_facts.map { |row| row.to_csv(col_sep: "\t") }
+    end
   end
 end
