@@ -8,10 +8,7 @@ require 'sinatra/base'
 
 class Facts < Sinatra::Base
   set :root, APP_ROOT
-  set :quiet, true
-  # set :lock, true
-  set :threaded, false
-
+  disable :quiet
   enable :logging
 
   # Make development a little bit chatier
@@ -102,11 +99,11 @@ class Facts < Sinatra::Base
       debug "cache time: #{@facts['cache_time']}"
       return true unless @facts['cache_time']
 
-      expiry = ENV['EXPIRY'].to_i || 60
+      expiry = ENV['EXPIRY'] || 60
 
       cache_time = Time.parse(@facts['cache_time'])
       debug "cache age: #{Time.now - cache_time}"
-      (Time.now - cache_time) > expiry
+      (Time.now - cache_time) > expiry.to_i
     end
 
     def update!
