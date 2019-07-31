@@ -1,6 +1,8 @@
 # Define a default source for gems
 source 'https://rubygems.org/'
 
+ruby '> 2.2.0'
+
 # declare the sinatra dependency
 gem 'sinatra', '~> 2.0.0'
 
@@ -19,10 +21,10 @@ group :puppet do
   gem 'puppet'
 end
 
-group :test do
-  gem 'rspec'
-end
-
 group :puma do
   gem 'puma'
+end
+
+group :thin do
+  gem 'thin'
 end
