@@ -9,7 +9,8 @@ require 'sinatra/base'
 class Facts < Sinatra::Base
   set :root, APP_ROOT
   set :quiet, true
-  set :lock, true
+  # set :lock, true
+  set :threaded, false
 
   enable :logging
 
@@ -74,25 +75,38 @@ class Facts < Sinatra::Base
     ].freeze
     FILTERS = ENV['FILTER'] ? ENV['FILTER'].split(',').map(&:strip) : DEFAULT_FILTERS
 
+    def debug(msg)
+      warn msg.to_s if ENV['DEBUG']
+    end
+
     def initialize
+      @mutex = Mutex.new
       update!
     end
 
     def facts
-      return @facts unless expired?
+      with_mutex do
+        return @facts unless expired?
 
-      warn 'cache age expired, refreshing fact cache' if ENV['DEBUG']
-      update!
-      @facts
+        debug 'cache age expired, refreshing fact cache'
+        update!
+
+        debug "facts_cache size: (#{@facts.keys.size} keys), time: #{@facts['cache_time']}"
+        @facts
+      end
     end
 
+    private
+
     def expired?
-      warn "cache time: #{@facts['cache_time']}" if ENV['DEBUG']
+      debug "cache time: #{@facts['cache_time']}"
       return true unless @facts['cache_time']
 
+      expiry = ENV['EXPIRY'].to_i || 60
+
       cache_time = Time.parse(@facts['cache_time'])
-      warn "cache age: #{Time.now - cache_time}" if ENV['DEBUG']
-      (Time.now - cache_time) > 60
+      debug "cache age: #{Time.now - cache_time}"
+      (Time.now - cache_time) > expiry
     end
 
     def update!
@@ -103,7 +117,11 @@ class Facts < Sinatra::Base
       f = Facter.to_hash
       f['cache_time'] = Time.now.to_s
       @facts = Hash[f.sort].delete_if { |key| FILTERS.include? key }
-      warn "updated facts_cache; (#{@facts.keys.size} keys), new time #{@facts['cache_time']}" if ENV['DEBUG']
+      debug "updated facts_cache; (#{@facts.keys.size} keys), new time #{@facts['cache_time']}"
+    end
+
+    def with_mutex
+      @mutex.synchronize { yield }
     end
   end
 end
